@@ -78,9 +78,6 @@ app.get('/api/events/stream', async (c) => {
                     controller.enqueue(encoder.encode(':keepalive\n\n'));
                 }, 30000);
 
-                // Store controller for later use (you'd want a proper event system here)
-                c.set('sseController', controller);
-
                 // Cleanup on close
                 c.req.raw.signal.addEventListener('abort', () => {
                     clearInterval(keepAlive);

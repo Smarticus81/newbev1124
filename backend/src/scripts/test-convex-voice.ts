@@ -11,8 +11,7 @@ async function main() {
     // Mock context
     const context: ToolContext = {
         sessionId: 'test-session-' + Date.now(),
-        venueId: 'venue-1', // Assuming this exists or isn't strictly checked yet
-        action: 'add_to_cart'
+        venueId: 1,
     };
 
     console.log(`Using Session ID: ${context.sessionId}`);
