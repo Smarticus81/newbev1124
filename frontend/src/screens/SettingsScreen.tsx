@@ -181,7 +181,7 @@ const SettingsScreen = () => {
                                 }}
                             >
                                 {category}
-                                <div style={{ fontSize: '12px', color: theme.neutrals[600], marginTop: '4px' }}>
+                                <div style={{ fontSize: '12px', color: theme.neutral[600], marginTop: '4px' }}>
                                     {categoryGroups[category].length} drinks
                                 </div>
                             </button>
@@ -243,10 +243,10 @@ const SettingsScreen = () => {
                                             />
                                         )}
                                         <div>
-                                            <div style={{ fontWeight: '600', color: theme.neutrals[900] }}>
+                                            <div style={{ fontWeight: '600', color: theme.neutral[900] }}>
                                                 {drink.name}
                                             </div>
-                                            <div style={{ fontSize: '12px', color: theme.neutrals[600] }}>
+                                            <div style={{ fontSize: '12px', color: theme.neutral[600] }}>
                                                 ${(drink.price / 100).toFixed(2)} · {drink.inventory} in stock
                                             </div>
                                         </div>
@@ -281,7 +281,7 @@ const SettingsScreen = () => {
                 >
                     System Information
                 </h2>
-                <div style={{ fontSize: '14px', color: theme.neutrals[600], lineHeight: '1.6' }}>
+                <div style={{ fontSize: '14px', color: theme.neutral[600], lineHeight: '1.6' }}>
                     <div>Voice Engine: Gemini 2.5 Flash</div>
                     <div>Database: Convex</div>
                     <div>Version: 1.0.0</div>
