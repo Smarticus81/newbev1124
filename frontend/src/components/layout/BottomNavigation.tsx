@@ -5,10 +5,11 @@ interface BottomNavigationProps {
     currentIndex: number;
     onNavigate: (index: number) => void;
     voiceClient: any;
+    isCompact?: boolean;
 }
 
-const BottomNavigation = ({ currentIndex, onNavigate, voiceClient }: BottomNavigationProps) => {
-    const screenNames = ['Menu', 'Tabs', 'Transactions', 'Items'];
+const BottomNavigation = ({ currentIndex, onNavigate, voiceClient, isCompact = false }: BottomNavigationProps) => {
+    const screenNames = ['Menu', 'Tabs', 'Transactions', 'Items', 'Settings'];
 
     // Icon SVGs (simplified versions - you can replace with actual icons)
     const icons = [
@@ -34,6 +35,10 @@ const BottomNavigation = ({ currentIndex, onNavigate, voiceClient }: BottomNavig
             <rect x="3" y="11" width="6" height="6" rx="1" />
             <rect x="11" y="11" width="6" height="6" rx="1" />
         </svg>,
+        // Settings icon
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M11.94 2.5l.36 1.78c.3.05.59.13.88.23l1.54-1.1 1.54 2.66-1.54 1.1c.12.28.21.57.28.87l1.8.36v3.08l-1.8.36c-.07.3-.16.6-.28.88l1.54 1.1-1.54 2.66-1.54-1.1c-.29.1-.58.18-.88.23l-.36 1.78H8.06l-.36-1.78a5.45 5.45 0 01-.88-.23l-1.54 1.1-1.54-2.66 1.54-1.1a5.7 5.7 0 01-.28-.88l-1.8-.36V8.47l1.8-.36c.07-.3.16-.59.28-.87l-1.54-1.1 1.54-2.66 1.54 1.1c.29-.1.58-.18.88-.23l.36-1.78h3.88zM10 7.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z" />
+        </svg>,
     ];
 
     const selectedColor = theme.brand.pine;
@@ -43,7 +48,8 @@ const BottomNavigation = ({ currentIndex, onNavigate, voiceClient }: BottomNavig
         <div
             style={{
                 position: 'relative',
-                height: '100px',
+                height: isCompact ? '76px' : '100px',
+                paddingBottom: isCompact ? 'env(safe-area-inset-bottom, 0px)' : 0,
             }}
         >
             {/* Bottom bar */}
@@ -53,21 +59,21 @@ const BottomNavigation = ({ currentIndex, onNavigate, voiceClient }: BottomNavig
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    height: '100px',
+                    height: isCompact ? '76px' : '100px',
                     backgroundColor: theme.neutral[0],
                     borderTop: `1px solid ${theme.neutral[300]}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    paddingBottom: '24px',
-                    paddingTop: '8px',
+                    paddingBottom: isCompact ? '12px' : '24px',
+                    paddingTop: isCompact ? '12px' : '8px',
                 }}
             >
                 <div
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '18px',
+                        gap: isCompact ? '12px' : '18px',
                     }}
                 >
                     {screenNames.map((name, index) => {
@@ -81,7 +87,7 @@ const BottomNavigation = ({ currentIndex, onNavigate, voiceClient }: BottomNavig
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '10px',
+                                    gap: isCompact ? '6px' : '10px',
                                     cursor: 'pointer',
                                     background: 'none',
                                     border: 'none',
@@ -96,13 +102,28 @@ const BottomNavigation = ({ currentIndex, onNavigate, voiceClient }: BottomNavig
                                 </div>
                                 <span
                                     style={{
-                                        fontSize: '18px',
+                                        fontSize: isCompact ? '14px' : '18px',
                                         fontWeight: isSelected ? 600 : 400,
                                         fontFamily: 'Instrument Sans, sans-serif',
+                                        display: isCompact ? 'none' : 'inline',
                                     }}
                                 >
                                     {name}
                                 </span>
+                                {isCompact && (
+                                    <span
+                                        style={{
+                                            fontSize: '12px',
+                                            fontWeight: isSelected ? 600 : 500,
+                                            letterSpacing: 0.2,
+                                            textTransform: 'uppercase',
+                                            display: 'block',
+                                            marginTop: '2px',
+                                        }}
+                                    >
+                                        {name.slice(0, 3)}
+                                    </span>
+                                )}
                             </button>
                         );
                     })}
@@ -113,9 +134,10 @@ const BottomNavigation = ({ currentIndex, onNavigate, voiceClient }: BottomNavig
             <div
                 style={{
                     position: 'absolute',
-                    right: '154px',
-                    top: '15px',
+                    right: isCompact ? '50%' : '154px',
+                    top: isCompact ? '-28px' : '15px',
                     zIndex: 10,
+                    transform: isCompact ? 'translateX(50%)' : 'none',
                 }}
             >
                 <VoiceButton voiceClient={voiceClient} />

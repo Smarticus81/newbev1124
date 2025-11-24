@@ -30,6 +30,22 @@ body {
   height: 100%;
 }
 
+@media (max-width: 1024px) {
+  html,
+  body {
+    overflow-y: auto;
+    height: auto;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  .app-container {
+    min-height: 100vh;
+  }
+}
+
 /* Remove default button styles */
 button {
   font-family: inherit;

@@ -9,6 +9,7 @@ import SettingsScreen from './screens/SettingsScreen';
 import BottomNavigation from './components/layout/BottomNavigation';
 import { useVoiceClient } from './hooks/useVoiceClient';
 import Header from './components/layout/Header';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
 function App() {
     // Last updated: 2025-11-21 15:31
@@ -31,6 +32,8 @@ function App() {
         }
     }, []);
 
+    const isCompactLayout = useMediaQuery('(max-width: 1024px)');
+
     // Dynamic WebSocket URL based on environment
     const wsUrl = import.meta.env.PROD 
         ? `wss://${window.location.host}/ws`  // Production: secure WebSocket
@@ -49,13 +52,16 @@ function App() {
 
     return (
         <div
+            className="app-container"
             style={{
                 width: '100%',
-                height: '100vh',
+                minHeight: '100vh',
+                height: isCompactLayout ? 'auto' : '100vh',
                 display: 'flex',
                 flexDirection: 'column',
                 backgroundColor: theme.brand.backgroundColor,
                 position: 'relative', // Ensure overlay is positioned relative to this
+                paddingBottom: isCompactLayout ? 'calc(80px + env(safe-area-inset-bottom, 0))' : 0,
             }}
         >
             {/* Premium Voice Pulse Overlay */}
@@ -69,14 +75,14 @@ function App() {
                     pointerEvents: 'none',
                     zIndex: 9999,
                     transition: 'opacity 0.5s ease',
-                    opacity: (isSpeaking || isListening) ? 1 : 0,
+                    opacity: !isCompactLayout && (isSpeaking || isListening) ? 1 : 0,
                     // Use a large inset shadow for the diffuse glow
                     boxShadow: isSpeaking
                         ? `inset 0 0 40px 10px rgba(255, 182, 193, 0.6)` // Diffuse Pink
                         : isListening
                             ? `inset 0 0 40px 10px rgba(255, 182, 193, 0.3)` // Softer Pink
                             : 'none',
-                    animation: (isSpeaking || isListening) ? 'dreamyBreath 4s ease-in-out infinite' : 'none',
+                    animation: !isCompactLayout && (isSpeaking || isListening) ? 'dreamyBreath 4s ease-in-out infinite' : 'none',
                 }}
             />
             <style>{`
@@ -100,7 +106,7 @@ function App() {
             <div
                 style={{
                     flex: 1,
-                    overflow: 'hidden',
+                    overflow: isCompactLayout ? 'visible' : 'hidden',
                 }}
             >
                 {screens[currentIndex]}
@@ -111,6 +117,7 @@ function App() {
                 currentIndex={currentIndex}
                 onNavigate={setCurrentIndex}
                 voiceClient={voiceClient}
+                isCompact={isCompactLayout}
             />
         </div>
     );

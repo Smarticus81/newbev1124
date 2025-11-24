@@ -6,7 +6,13 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../backend/convex/_generated/api';
 import BevProLogo from '../common/BevProLogo';
 
-const CartPanel = () => {
+interface CartPanelProps {
+    isCompact?: boolean;
+    isOpen?: boolean;
+    onClose?: () => void;
+}
+
+const CartPanel = ({ isCompact = false, isOpen = true, onClose }: CartPanelProps) => {
     const { sessionId, currentOrderId } = useCartStore();
     const [orderName, setOrderName] = useState("New Tab");
     const [isProcessing, setIsProcessing] = useState(false);
@@ -64,30 +70,79 @@ const CartPanel = () => {
         alert('Save tab functionality coming soon!');
     };
 
+    const containerBase: React.CSSProperties = isCompact
+        ? {
+            position: 'fixed',
+            left: '50%',
+            transform: `translate(-50%, ${isOpen ? '0%' : '110%'})`,
+            bottom: `calc(env(safe-area-inset-bottom, 0px))`,
+            width: '100%',
+            maxWidth: '520px',
+            backgroundColor: theme.neutral[0],
+            display: 'flex',
+            flexDirection: 'column',
+            height: '75vh',
+            borderRadius: '22px 22px 12px 12px',
+            boxShadow: '0 -12px 35px rgba(15, 23, 42, 0.28)',
+            border: `1px solid ${theme.neutral[200]}`,
+            transition: 'transform 0.35s ease',
+            zIndex: 1100,
+            overflow: 'hidden',
+            paddingBottom: `calc(12px + env(safe-area-inset-bottom, 0px))`,
+            pointerEvents: isOpen ? 'auto' : 'none',
+        }
+        : {
+            width: '375px',
+            backgroundColor: theme.neutral[0],
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            borderLeft: `1px solid ${theme.neutral[200]}`,
+        };
+
+    const headerStyle: React.CSSProperties = isCompact
+        ? {
+            padding: '18px 20px 12px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: `1px solid ${theme.neutral[200]}`
+        }
+        : { padding: '16px', display: 'flex', gap: '12px' };
+
+    const bodyPadding = isCompact ? '0 20px' : '0 16px';
+
     return (
         <div
-            style={{
-                width: '375px',
-                backgroundColor: theme.neutral[0],
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
-                borderLeft: `1px solid ${theme.neutral[200]}`,
-            }}
+            style={containerBase}
         >
             {/* Header with Save and Pay buttons */}
-            <div style={{ padding: '16px', display: 'flex', gap: '12px' }}>
+            <div style={headerStyle}>
+                {isCompact && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                            width: '40px',
+                            height: '4px',
+                            borderRadius: '99px',
+                            backgroundColor: theme.neutral[200],
+                        }} />
+                        <span style={{ ...theme.typography.subheadText, color: theme.neutral[500], fontSize: '14px' }}>
+                            Active Cart
+                        </span>
+                    </div>
+                )}
+
                 {/* Save Button */}
                 <button
                     onClick={handleSave}
                     style={{
                         flex: 1,
-                        padding: '12px',
+                        padding: isCompact ? '10px' : '12px',
                         backgroundColor: theme.neutral[100], // Light grey
                         color: theme.neutral[1000],
                         border: 'none',
                         borderRadius: '8px',
-                        fontSize: '15px',
+                        fontSize: isCompact ? '14px' : '15px',
                         fontWeight: 600,
                         fontFamily: 'Instrument Sans, sans-serif',
                         cursor: 'pointer',
@@ -102,12 +157,12 @@ const CartPanel = () => {
                     disabled={items.length === 0 || isProcessing}
                     style={{
                         flex: 1,
-                        padding: '12px',
+                        padding: isCompact ? '10px' : '12px',
                         backgroundColor: '#FFC531', // Exact yellow from image
                         color: theme.neutral[1000],
                         border: 'none',
                         borderRadius: '8px',
-                        fontSize: '15px',
+                        fontSize: isCompact ? '14px' : '15px',
                         fontWeight: 600,
                         fontFamily: 'Instrument Sans, sans-serif',
                         cursor: items.length === 0 || isProcessing ? 'not-allowed' : 'pointer',
@@ -120,8 +175,8 @@ const CartPanel = () => {
                 {/* Print Button */}
                 <button
                     style={{
-                        width: '44px',
-                        height: '44px',
+                        width: isCompact ? '40px' : '44px',
+                        height: isCompact ? '40px' : '44px',
                         backgroundColor: theme.neutral[0],
                         border: `1px solid ${theme.neutral[300]}`,
                         borderRadius: '8px',
@@ -138,7 +193,7 @@ const CartPanel = () => {
             </div>
 
             {/* Tab Name and Info */}
-            <div style={{ padding: '0 16px 16px 16px' }}>
+            <div style={{ padding: `${isCompact ? '0 20px 12px 20px' : '0 16px 16px 16px'}` }}>
                 <input
                     type="text"
                     value={orderName}
@@ -151,7 +206,7 @@ const CartPanel = () => {
                         backgroundColor: 'transparent',
                         padding: 0,
                         width: '100%',
-                        fontSize: '18px',
+                        fontSize: isCompact ? '16px' : '18px',
                         fontWeight: 700,
                     }}
                 />
@@ -165,7 +220,7 @@ const CartPanel = () => {
                 style={{
                     flex: 1,
                     overflowY: 'auto',
-                    padding: '0 16px',
+                    padding: bodyPadding,
                 }}
             >
                 {items.length === 0 ? (
@@ -191,7 +246,7 @@ const CartPanel = () => {
             </div>
 
             {/* Summary Section */}
-            <div style={{ padding: '16px', borderTop: `1px solid ${theme.neutral[200]}` }}>
+            <div style={{ padding: isCompact ? '16px 20px 0 20px' : '16px', borderTop: `1px solid ${theme.neutral[200]}` }}>
                 {/* Subtotal */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ ...theme.typography.subheadText, color: theme.neutral[600] }}>
@@ -224,9 +279,28 @@ const CartPanel = () => {
 
                 {/* BEVPRO Logo */}
                 <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: '8px' }}>
-                    <BevProLogo width={80} color="#A5BEC5" />
+                    <BevProLogo width={isCompact ? 64 : 80} color="#A5BEC5" />
                 </div>
             </div>
+
+            {isCompact && onClose && (
+                <button
+                    onClick={onClose}
+                    style={{
+                        position: 'absolute',
+                        top: '14px',
+                        right: '18px',
+                        background: 'none',
+                        border: 'none',
+                        color: theme.neutral[400],
+                        fontSize: '16px',
+                        cursor: 'pointer',
+                    }}
+                    aria-label="Close cart"
+                >
+                    ✕
+                </button>
+            )}
         </div>
     );
 };

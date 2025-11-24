@@ -5,6 +5,7 @@ import { api } from '../../../backend/convex/_generated/api';
 import BevProLogo from '../components/common/BevProLogo';
 import { useCartStore } from '../store/cartStore';
 import type { Id } from '../../../backend/convex/_generated/dataModel';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 const SavedOrdersScreen = () => {
     const tabs = useQuery(api.orders.listPendingOrders) || [];
@@ -15,6 +16,7 @@ const SavedOrdersScreen = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newTabName, setNewTabName] = useState('');
+    const isCompact = useMediaQuery('(max-width: 1024px)');
 
     const handleCreateTab = async () => {
         if (!newTabName.trim()) return;
@@ -50,24 +52,33 @@ const SavedOrdersScreen = () => {
     return (
         <div style={{
             width: '100%',
-            height: '100%',
+            minHeight: '100%',
             backgroundColor: theme.brand.backgroundColor,
             display: 'flex',
             flexDirection: 'column',
-            padding: '24px',
-            overflow: 'hidden'
+            padding: isCompact ? '16px' : '24px',
+            gap: isCompact ? '16px' : '24px',
+            overflow: isCompact ? 'visible' : 'hidden'
         }}>
             {/* Header */}
             <div style={{
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '24px',
+                flexDirection: isCompact ? 'column' : 'row',
+                alignItems: isCompact ? 'flex-start' : 'center',
+                justifyContent: isCompact ? 'flex-start' : 'space-between',
+                gap: isCompact ? '12px' : '0',
                 flexShrink: 0,
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <BevProLogo width={110} color={theme.blue[400]} />
-                    <h1 style={{ ...theme.typography.headingH2, color: theme.neutral[900], margin: 0 }}>Open Tabs</h1>
+                    <BevProLogo width={isCompact ? 90 : 110} color={theme.blue[400]} />
+                    <h1 style={{
+                        ...theme.typography.headingH2,
+                        color: theme.neutral[900],
+                        margin: 0,
+                        fontSize: isCompact ? '24px' : theme.typography.headingH2.fontSize
+                    }}>
+                        Open Tabs
+                    </h1>
                 </div>
                 <button
                     onClick={() => setIsModalOpen(true)}
@@ -76,11 +87,12 @@ const SavedOrdersScreen = () => {
                         color: 'white',
                         border: 'none',
                         borderRadius: '8px',
-                        padding: '12px 24px',
+                        padding: isCompact ? '10px 18px' : '12px 24px',
                         fontSize: '16px',
                         fontWeight: 600,
                         cursor: 'pointer',
-                        boxShadow: theme.shadows.medium
+                        boxShadow: theme.shadows.medium,
+                        width: isCompact ? '100%' : 'auto'
                     }}
                 >
                     + New Tab
@@ -90,9 +102,9 @@ const SavedOrdersScreen = () => {
             {/* Tabs Grid */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: '16px',
-                overflowY: 'auto',
+                gridTemplateColumns: isCompact ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
+                gap: isCompact ? '12px' : '16px',
+                overflowY: isCompact ? 'visible' : 'auto',
                 paddingBottom: '20px'
             }}>
                 {tabs.length === 0 ? (
@@ -107,23 +119,23 @@ const SavedOrdersScreen = () => {
                             style={{
                                 backgroundColor: theme.neutral[0],
                                 borderRadius: '12px',
-                                padding: '20px',
+                                padding: isCompact ? '16px' : '20px',
                                 boxShadow: theme.shadows.small,
                                 border: `1px solid ${theme.neutral[200]}`,
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '12px',
+                                gap: isCompact ? '10px' : '12px',
                                 cursor: 'pointer',
                                 transition: 'transform 0.2s, box-shadow 0.2s',
                                 position: 'relative'
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontWeight: 700, fontSize: '18px', color: theme.neutral[900] }}>
+                                <span style={{ fontWeight: 700, fontSize: isCompact ? '16px' : '18px', color: theme.neutral[900] }}>
                                     {tab.order_name || `Tab #${tab._id.slice(-4)}`}
                                 </span>
                                 <span style={{
-                                    fontSize: '12px',
+                                    fontSize: isCompact ? '11px' : '12px',
                                     color: theme.neutral[500],
                                     backgroundColor: theme.neutral[100],
                                     padding: '4px 8px',
@@ -133,7 +145,7 @@ const SavedOrdersScreen = () => {
                                 </span>
                             </div>
 
-                            <div style={{ flex: 1, minHeight: '60px' }}>
+                            <div style={{ flex: 1, minHeight: isCompact ? '50px' : '60px' }}>
                                 {tab.items && tab.items.length > 0 ? (
                                     <>
                                         {tab.items.slice(0, 3).map((item: any, idx: number) => (

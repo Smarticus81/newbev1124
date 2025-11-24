@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { theme } from '../styles/theme';
 import { useQuery } from 'convex/react';
 import { api } from '../../../backend/convex/_generated/api';
@@ -6,17 +6,23 @@ import type { Product } from '../types/models';
 import ProductCard from '../components/products/ProductCard';
 import CartPanel from '../components/cart/CartPanel';
 import BevProLogo from '../components/common/BevProLogo';
+import { useMediaQuery } from '../hooks/useMediaQuery';
+import { useCartStore } from '../store/cartStore';
 
 const ProductsScreen = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>('Signature');
     const [viewMode, setViewMode] = useState<'categories' | 'products'>('categories');
     const [searchQuery, setSearchQuery] = useState('');
 
+    const isCompact = useMediaQuery('(max-width: 1024px)');
+    const cartCount = useCartStore((state) => state.items.reduce((sum, item) => sum + item.quantity, 0));
+    const [showCartSheet, setShowCartSheet] = useState(false);
+
     // Fetch all drinks from Convex
     const allDrinks = useQuery(api.drinks.listDrinks) || [];
 
     // Transform Convex drinks to Product format
-    const products: Product[] = allDrinks.map((drink: any) => ({
+    const products: Product[] = useMemo(() => allDrinks.map((drink: any) => ({
         id: drink._id,
         name: drink.name,
         category: drink.category,
@@ -26,10 +32,14 @@ const ProductsScreen = () => {
         imageUrl: drink.image_url,
         createdAt: new Date(drink.created_at).toISOString(),
         updatedAt: new Date(drink.updated_at).toISOString(),
-    }));
+    })), [allDrinks]);
+
+    useEffect(() => {
+        setShowCartSheet(!isCompact);
+    }, [isCompact]);
 
     // Filter products based on Category and Search
-    const filteredProducts = products.filter((product) => {
+    const filteredProducts = useMemo(() => products.filter((product) => {
         const prodCat = product.category || '';
         let matchCategory = false;
 
@@ -55,7 +65,7 @@ const ProductsScreen = () => {
             .includes(searchQuery.toLowerCase());
 
         return matchCategory && matchesSearch;
-    });
+    }), [products, selectedCategory, searchQuery]);
 
     const categories = ['Signature', 'Classics', 'Beer', 'Wines', 'Spirits', 'Non-Alcoholic'];
 
@@ -83,30 +93,32 @@ const ProductsScreen = () => {
     return (
         <div style={{
             width: '100%',
-            height: '100%',
+            minHeight: '100%',
             display: 'flex',
+            flexDirection: isCompact ? 'column' : 'row',
             backgroundColor: theme.brand.backgroundColor,
         }}>
             {/* Left side - Products Grid */}
             <div style={{
-                flex: 2,
+                flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
-                overflow: 'hidden',
+                overflow: isCompact ? 'visible' : 'hidden',
             }}>
                 {/* Header Bar with Logo, Tabs, Search */}
                 <div style={{
-                    padding: '16px 24px',
+                    padding: isCompact ? '16px 16px 12px 16px' : '16px 24px',
                     display: 'flex',
-                    alignItems: 'center',
+                    alignItems: isCompact ? 'stretch' : 'center',
                     justifyContent: 'space-between',
-                    gap: '24px',
+                    gap: isCompact ? '12px' : '24px',
+                    flexDirection: isCompact ? 'column' : 'row',
                     backgroundColor: theme.neutral[0],
                     borderBottom: `1px solid ${theme.neutral[200]}`
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: isCompact ? '12px' : '32px', flexWrap: 'wrap' }}>
                         {/* BevPro Logo */}
-                        <BevProLogo width={110} color={theme.blue[400]} />
+                        <BevProLogo width={isCompact ? 90 : 110} color={theme.blue[400]} />
 
                         {/* Back Button (only in products mode) */}
                         {viewMode === 'products' && (
@@ -133,7 +145,7 @@ const ProductsScreen = () => {
 
                         {/* Category Tabs (only in products mode) */}
                         {viewMode === 'products' && (
-                            <div style={{ display: 'flex', gap: '8px' }}>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', maxWidth: isCompact ? '100%' : 'unset' }}>
                                 {categories.map(category => (
                                     <button
                                         key={category}
@@ -147,7 +159,7 @@ const ProductsScreen = () => {
                                             fontWeight: selectedCategory === category ? 600 : 400,
                                             cursor: 'pointer',
                                             fontFamily: 'Instrument Sans, sans-serif',
-                                            fontSize: '14px',
+                                            fontSize: isCompact ? '13px' : '14px',
                                             transition: 'all 0.2s'
                                         }}
                                     >
@@ -159,7 +171,7 @@ const ProductsScreen = () => {
                     </div>
 
                     {/* Search Field */}
-                    <div style={{ width: '320px', position: 'relative' }}>
+                    <div style={{ width: isCompact ? '100%' : '320px', position: 'relative' }}>
                         <input
                             type="text"
                             placeholder="Search products..."
@@ -197,9 +209,8 @@ const ProductsScreen = () => {
                         /* Categories Grid */
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(3, 1fr)',
-                            gridTemplateRows: 'repeat(2, 1fr)',
-                            gap: '24px',
+                            gridTemplateColumns: isCompact ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, 1fr)',
+                            gap: isCompact ? '14px' : '24px',
                             height: '100%',
                         }}>
                             {categories.map(category => {
@@ -241,6 +252,7 @@ const ProductsScreen = () => {
                                         style={{
                                             width: '100%',
                                             height: '100%',
+                                            minHeight: isCompact ? '140px' : '180px',
                                             background: bgGradient,
                                             borderRadius: '16px',
                                             boxShadow: theme.shadows.medium,
@@ -277,7 +289,7 @@ const ProductsScreen = () => {
                                         }} />
 
                                         <h3 style={{
-                                            fontSize: '24px',
+                                            fontSize: isCompact ? '20px' : '24px',
                                             fontWeight: 600,
                                             color: theme.neutral[900],
                                             margin: 0,
@@ -287,7 +299,7 @@ const ProductsScreen = () => {
                                         </h3>
                                         <span style={{
                                             marginTop: '8px',
-                                            fontSize: '14px',
+                                            fontSize: isCompact ? '13px' : '14px',
                                             color: theme.neutral[600],
                                             zIndex: 1,
                                             fontWeight: 500
@@ -302,8 +314,8 @@ const ProductsScreen = () => {
                         /* Product Grid */
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                            gap: '16px',
+                            gridTemplateColumns: isCompact ? 'repeat(2, minmax(0, 1fr))' : 'repeat(auto-fit, minmax(200px, 1fr))',
+                            gap: isCompact ? '12px' : '16px',
                         }}>
                             {filteredProducts.map((product) => (
                                 <ProductCard key={product.id} product={product} />
@@ -317,7 +329,50 @@ const ProductsScreen = () => {
             <div style={{ width: '1px', backgroundColor: theme.neutral[200] }} />
 
             {/* Right side - Cart Panel */}
-            <CartPanel />
+            {!isCompact && <CartPanel />}
+
+            {isCompact && (
+                <>
+                    {showCartSheet && (
+                        <div
+                            onClick={() => setShowCartSheet(false)}
+                            style={{
+                                position: 'fixed',
+                                inset: 0,
+                                backgroundColor: 'rgba(15, 23, 42, 0.32)',
+                                zIndex: 1005,
+                            }}
+                        />
+                    )}
+
+                    <CartPanel
+                        isCompact
+                        isOpen={showCartSheet}
+                        onClose={() => setShowCartSheet(false)}
+                    />
+
+                    <button
+                        onClick={() => setShowCartSheet((prev) => !prev)}
+                        style={{
+                            position: 'fixed',
+                            bottom: `calc(90px + env(safe-area-inset-bottom, 0px))`,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            padding: '14px 24px',
+                            backgroundColor: theme.brand.pine,
+                            color: 'white',
+                            borderRadius: '999px',
+                            border: 'none',
+                            fontWeight: 600,
+                            fontSize: '15px',
+                            boxShadow: '0 12px 30px rgba(15, 23, 42, 0.32)',
+                            zIndex: 1200,
+                        }}
+                    >
+                        {showCartSheet ? 'Close Cart' : `Cart${cartCount ? ` · ${cartCount}` : ''}`}
+                    </button>
+                </>
+            )}
         </div>
     );
 };

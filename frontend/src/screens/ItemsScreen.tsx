@@ -3,9 +3,11 @@ import { theme } from '../styles/theme';
 import { useQuery } from 'convex/react';
 import { api } from '../../../backend/convex/_generated/api';
 import BevProLogo from '../components/common/BevProLogo';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 const ItemsScreen = () => {
     const drinks = useQuery(api.drinks.listDrinks) || [];
+    const isCompact = useMediaQuery('(max-width: 1024px)');
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
 
@@ -26,36 +28,50 @@ const ItemsScreen = () => {
     return (
         <div style={{
             width: '100%',
-            height: '100%',
+            minHeight: '100%',
             backgroundColor: theme.brand.backgroundColor,
             display: 'flex',
             flexDirection: 'column',
-            padding: '24px',
-            overflow: 'hidden'
+            padding: isCompact ? '16px' : '24px',
+            gap: isCompact ? '16px' : '24px',
+            overflow: isCompact ? 'visible' : 'hidden'
         }}>
             {/* Header */}
             <div style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '24px',
-                flexShrink: 0
+                flexDirection: isCompact ? 'column' : 'row',
+                alignItems: isCompact ? 'flex-start' : 'center',
+                justifyContent: isCompact ? 'flex-start' : 'space-between',
+                gap: isCompact ? '12px' : '0',
+                marginBottom: isCompact ? '8px' : '24px',
+                flexWrap: 'wrap'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <BevProLogo width={110} color={theme.blue[400]} />
-                    <h1 style={{ ...theme.typography.headingH2, color: theme.neutral[900], margin: 0 }}>Inventory</h1>
+                    <BevProLogo width={isCompact ? 88 : 110} color={theme.blue[400]} />
+                    <h1 style={{
+                        ...theme.typography.headingH2,
+                        color: theme.neutral[900],
+                        margin: 0,
+                        fontSize: isCompact ? '24px' : theme.typography.headingH2.fontSize
+                    }}>Inventory</h1>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    flexWrap: 'wrap',
+                    width: isCompact ? '100%' : 'auto',
+                    justifyContent: isCompact ? 'stretch' : 'flex-end'
+                }}>
                     {/* Search */}
-                    <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'relative', flex: isCompact ? '1' : '0' }}>
                         <input
                             type="text"
                             placeholder="Search drinks..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             style={{
-                                width: '250px',
+                                width: isCompact ? '100%' : '250px',
                                 height: '40px',
                                 padding: '0 16px 0 40px',
                                 borderRadius: '8px',
@@ -79,6 +95,7 @@ const ItemsScreen = () => {
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
                         style={{
+                            flex: isCompact ? '1' : '0',
                             height: '40px',
                             padding: '0 16px',
                             borderRadius: '8px',
@@ -107,23 +124,25 @@ const ItemsScreen = () => {
                 flexDirection: 'column'
             }}>
                 {/* Table Header */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '60px 2fr 1.5fr 1fr 1fr 1fr',
-                    padding: '16px 24px',
-                    borderBottom: `1px solid ${theme.neutral[200]}`,
-                    backgroundColor: theme.neutral[100],
-                    fontWeight: 600,
-                    color: theme.neutral[600],
-                    fontSize: '14px'
-                }}>
-                    <div></div>
-                    <div>Name</div>
-                    <div>Category</div>
-                    <div>Price</div>
-                    <div>Stock (Bottles)</div>
-                    <div>Status</div>
-                </div>
+                {!isCompact && (
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '60px 2fr 1.5fr 1fr 1fr 1fr',
+                        padding: '16px 24px',
+                        borderBottom: `1px solid ${theme.neutral[200]}`,
+                        backgroundColor: theme.neutral[100],
+                        fontWeight: 600,
+                        color: theme.neutral[600],
+                        fontSize: '14px'
+                    }}>
+                        <div></div>
+                        <div>Name</div>
+                        <div>Category</div>
+                        <div>Price</div>
+                        <div>Stock (Bottles)</div>
+                        <div>Status</div>
+                    </div>
+                )}
 
                 {/* Table Body */}
                 <div style={{ overflowY: 'auto', flex: 1 }}>
@@ -134,6 +153,84 @@ const ItemsScreen = () => {
                     ) : (
                         filteredDrinks.map((drink: any) => {
                             const status = getStockStatus(drink.inventory);
+
+                            if (isCompact) {
+                                return (
+                                    <div
+                                        key={drink._id}
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '12px',
+                                            padding: '14px 16px',
+                                            borderRadius: '12px',
+                                            border: `1px solid ${theme.neutral[200]}`,
+                                            backgroundColor: theme.neutral[0],
+                                            marginBottom: '12px',
+                                            boxShadow: theme.shadows.small
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                            <div>
+                                                {drink.image_url ? (
+                                                    <img
+                                                        src={drink.image_url}
+                                                        alt={drink.name}
+                                                        style={{
+                                                            width: '46px',
+                                                            height: '46px',
+                                                            borderRadius: '8px',
+                                                            objectFit: 'cover'
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div style={{
+                                                        width: '46px',
+                                                        height: '46px',
+                                                        borderRadius: '8px',
+                                                        backgroundColor: theme.neutral[200],
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '20px'
+                                                    }}>
+                                                        🍺
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontWeight: 600, color: theme.neutral[900], fontSize: '16px' }}>
+                                                    {drink.name}
+                                                </div>
+                                                <div style={{ color: theme.neutral[500], fontSize: '13px' }}>
+                                                    {drink.category || 'Uncategorized'}
+                                                </div>
+                                            </div>
+                                            <span style={{
+                                                padding: '4px 10px',
+                                                borderRadius: '999px',
+                                                backgroundColor: status.bg,
+                                                color: status.color,
+                                                fontSize: '12px',
+                                                fontWeight: 600
+                                            }}>
+                                                {status.label}
+                                            </span>
+                                        </div>
+
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            fontSize: '13px',
+                                            color: theme.neutral[600]
+                                        }}>
+                                            <span>Price <strong>${(drink.price / 100).toFixed(2)}</strong></span>
+                                            <span>{drink.inventory.toFixed(1)} bottles</span>
+                                        </div>
+                                    </div>
+                                );
+                            }
+
                             return (
                                 <div key={drink._id} style={{
                                     display: 'grid',
@@ -146,7 +243,6 @@ const ItemsScreen = () => {
                                     transition: 'background-color 0.2s',
                                     cursor: 'pointer'
                                 }}>
-                                    {/* Image */}
                                     <div>
                                         {drink.image_url ? (
                                             <img
@@ -175,16 +271,12 @@ const ItemsScreen = () => {
                                         )}
                                     </div>
 
-                                    {/* Name */}
                                     <div style={{ fontWeight: 600 }}>{drink.name}</div>
 
-                                    {/* Category */}
                                     <div style={{ color: theme.neutral[600] }}>{drink.category}</div>
 
-                                    {/* Price */}
                                     <div style={{ fontWeight: 500 }}>${(drink.price / 100).toFixed(2)}</div>
 
-                                    {/* Stock */}
                                     <div style={{
                                         fontWeight: 600,
                                         color: drink.inventory < 5 ? theme.red[600] : theme.neutral[800]
@@ -192,7 +284,6 @@ const ItemsScreen = () => {
                                         {drink.inventory.toFixed(1)}
                                     </div>
 
-                                    {/* Status */}
                                     <div>
                                         <span style={{
                                             padding: '4px 10px',

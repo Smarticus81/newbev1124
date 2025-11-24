@@ -3,6 +3,7 @@ import { theme } from '../styles/theme';
 import BevProLogo from '../components/common/BevProLogo';
 import { useQuery } from 'convex/react';
 import { api } from '../../../backend/convex/_generated/api';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 const SettingsScreen = () => {
     const [selectedVoice, setSelectedVoice] = useState(() => 
@@ -11,6 +12,7 @@ const SettingsScreen = () => {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const allDrinks = useQuery(api.drinks.listDrinks) || [];
+    const isCompact = useMediaQuery('(max-width: 1024px)');
 
     const voices = [
         { id: 'Puck', name: 'Puck', description: 'Warm and friendly' },
@@ -43,19 +45,20 @@ const SettingsScreen = () => {
         <div
             style={{
                 width: '100%',
-                height: '100%',
+                minHeight: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                padding: '16px',
+                padding: isCompact ? '16px' : '24px',
+                gap: isCompact ? '16px' : '24px',
                 backgroundColor: theme.brand.backgroundColor,
                 overflowY: 'auto',
             }}
         >
             {/* Header */}
-            <div style={{ marginBottom: '24px' }}>
+            <div style={{ marginBottom: isCompact ? '12px' : '24px' }}>
                 <h1
                     style={{
-                        fontSize: '28px',
+                        fontSize: isCompact ? '24px' : '28px',
                         fontWeight: '700',
                         color: theme.neutral[900],
                         marginBottom: '8px',
@@ -65,7 +68,7 @@ const SettingsScreen = () => {
                 </h1>
                 <p
                     style={{
-                        fontSize: '14px',
+                        fontSize: isCompact ? '13px' : '14px',
                         color: theme.neutral[600],
                     }}
                 >
@@ -96,8 +99,8 @@ const SettingsScreen = () => {
                 <div
                     style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '12px',
+                        gridTemplateColumns: isCompact ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gap: isCompact ? '10px' : '12px',
                     }}
                 >
                     {voices.map((voice) => (
@@ -105,7 +108,7 @@ const SettingsScreen = () => {
                             key={voice.id}
                             onClick={() => handleVoiceChange(voice.id)}
                             style={{
-                                padding: '16px',
+                                padding: isCompact ? '14px' : '16px',
                                 borderRadius: '8px',
                                 border: selectedVoice === voice.id ? `2px solid ${theme.brand.lager}` : '2px solid #E5E7EB',
                                 backgroundColor: selectedVoice === voice.id ? '#FEF3F2' : 'white',
@@ -161,8 +164,8 @@ const SettingsScreen = () => {
                     <div
                         style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                            gap: '12px',
+                            gridTemplateColumns: isCompact ? 'repeat(2, minmax(0, 1fr))' : 'repeat(auto-fit, minmax(150px, 1fr))',
+                            gap: isCompact ? '10px' : '12px',
                         }}
                     >
                         {categories.map((category) => (
@@ -170,7 +173,7 @@ const SettingsScreen = () => {
                                 key={category}
                                 onClick={() => setSelectedCategory(category)}
                                 style={{
-                                    padding: '20px',
+                                padding: isCompact ? '16px' : '20px',
                                     borderRadius: '8px',
                                     border: '2px solid #E5E7EB',
                                     backgroundColor: 'white',
@@ -199,6 +202,7 @@ const SettingsScreen = () => {
                                 backgroundColor: 'white',
                                 cursor: 'pointer',
                                 fontSize: '14px',
+                                width: isCompact ? '100%' : 'auto'
                             }}
                         >
                             ← Back to Categories
@@ -206,7 +210,7 @@ const SettingsScreen = () => {
 
                         <h3
                             style={{
-                                fontSize: '16px',
+                                fontSize: isCompact ? '15px' : '16px',
                                 fontWeight: '600',
                                 color: theme.neutral[900],
                                 marginBottom: '12px',
@@ -225,8 +229,10 @@ const SettingsScreen = () => {
                                         border: '1px solid #E5E7EB',
                                         backgroundColor: drink.is_active ? 'white' : '#F9FAFB',
                                         display: 'flex',
-                                        alignItems: 'center',
+                                        alignItems: isCompact ? 'flex-start' : 'center',
                                         justifyContent: 'space-between',
+                                        flexDirection: isCompact ? 'column' : 'row',
+                                        gap: isCompact ? '12px' : '8px'
                                     }}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
@@ -252,7 +258,7 @@ const SettingsScreen = () => {
                                         </div>
                                     </div>
 
-                                    <div style={{ fontSize: '12px', color: drink.is_active ? theme.green[600] : theme.red[600] }}>
+                                    <div style={{ fontSize: '12px', color: drink.is_active ? theme.green[600] : theme.red[600], alignSelf: isCompact ? 'flex-start' : 'center' }}>
                                         {drink.is_active ? 'Active' : 'Inactive'}
                                     </div>
                                 </div>
