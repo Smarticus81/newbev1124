@@ -5,6 +5,7 @@ import ProductsScreen from './screens/ProductsScreen';
 import SavedOrdersScreen from './screens/SavedOrdersScreen';
 import TransactionsScreen from './screens/TransactionsScreen';
 import ItemsScreen from './screens/ItemsScreen';
+import SettingsScreen from './screens/SettingsScreen';
 import BottomNavigation from './components/layout/BottomNavigation';
 import { useVoiceClient } from './hooks/useVoiceClient';
 import Header from './components/layout/Header';
@@ -20,7 +21,8 @@ function App() {
                 'tabs': 1,
                 'transactions': 2,
                 'items': 3,
-                'inventory': 3
+                'inventory': 3,
+                'settings': 4
             };
             const index = screenMap[result.screen];
             if (index !== undefined) {
@@ -29,7 +31,12 @@ function App() {
         }
     }, []);
 
-    const voiceClient = useVoiceClient('ws://localhost:3001', handleToolExecuted);
+    // Dynamic WebSocket URL based on environment
+    const wsUrl = import.meta.env.PROD 
+        ? `wss://${window.location.host}/ws`  // Production: secure WebSocket
+        : 'ws://localhost:3000/ws';            // Development: local
+
+    const voiceClient = useVoiceClient(wsUrl, handleToolExecuted);
     const { isListening, isSpeaking } = voiceClient;
 
     const screens = [
@@ -37,6 +44,7 @@ function App() {
         <SavedOrdersScreen key="saved-orders" />,
         <TransactionsScreen key="transactions" />,
         <ItemsScreen key="items" />,
+        <SettingsScreen key="settings" />,
     ];
 
     return (
