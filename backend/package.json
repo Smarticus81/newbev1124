@@ -6,12 +6,8 @@
     "type": "module",
     "scripts": {
         "dev": "tsx watch src/server.ts",
-        "build": "npx prisma generate && tsc",
-        "start": "node dist/src/server.js",
-        "db:generate": "prisma generate",
-        "db:push": "prisma db push",
-        "db:migrate": "prisma migrate dev",
-        "db:studio": "prisma studio"
+        "build": "tsc",
+        "start": "node dist/src/server.js"
     },
     "keywords": [
         "voice",
@@ -24,7 +20,6 @@
     "dependencies": {
         "@google/genai": "^1.30.0",
         "@hono/node-server": "^1.13.7",
-        "@prisma/client": "^6.1.0",
         "@types/uuid": "^10.0.0",
         "convex": "^1.29.3",
         "dotenv": "^16.4.7",
@@ -38,7 +33,6 @@
     "devDependencies": {
         "@types/node": "^22.10.2",
         "@types/ws": "^8.5.13",
-        "prisma": "^6.1.0",
         "tsx": "^4.19.2",
         "typescript": "^5.7.2"
     }
