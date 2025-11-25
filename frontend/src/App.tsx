@@ -35,9 +35,11 @@ function App() {
     const isCompactLayout = useMediaQuery('(max-width: 1024px)');
 
     // Dynamic WebSocket URL based on environment
-    const wsUrl = import.meta.env.PROD 
-        ? `wss://${window.location.host}` // Production: secure WebSocket (usually on same port/domain via proxy)
-        : 'ws://localhost:3001';           // Development: local (dedicated port)
+    // In production, set VITE_WS_URL environment variable to your backend Railway URL
+    const wsUrl = import.meta.env.VITE_WS_URL 
+        || (import.meta.env.PROD 
+            ? `wss://${window.location.hostname.replace('frontend', 'backend')}` // Attempt auto-detect
+            : 'ws://localhost:3001');           // Development: local (dedicated port)
 
     const voiceClient = useVoiceClient(wsUrl, handleToolExecuted);
     const { isListening, isSpeaking } = voiceClient;
