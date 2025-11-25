@@ -36,8 +36,8 @@ function App() {
 
     // Dynamic WebSocket URL based on environment
     const wsUrl = import.meta.env.PROD 
-        ? `wss://${window.location.host}/ws`  // Production: secure WebSocket
-        : 'ws://localhost:3000/ws';            // Development: local
+        ? `wss://${window.location.host}` // Production: secure WebSocket (usually on same port/domain via proxy)
+        : 'ws://localhost:3001';           // Development: local (dedicated port)
 
     const voiceClient = useVoiceClient(wsUrl, handleToolExecuted);
     const { isListening, isSpeaking } = voiceClient;
@@ -61,7 +61,7 @@ function App() {
                 flexDirection: 'column',
                 backgroundColor: theme.brand.backgroundColor,
                 position: 'relative', // Ensure overlay is positioned relative to this
-                paddingBottom: isCompactLayout ? 'calc(80px + env(safe-area-inset-bottom, 0))' : 0,
+                paddingBottom: isCompactLayout ? 'calc(110px + env(safe-area-inset-bottom, 0))' : 0,
             }}
         >
             {/* Premium Voice Pulse Overlay */}

@@ -15,8 +15,16 @@ const ProductsScreen = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     const isCompact = useMediaQuery('(max-width: 1024px)');
-    const cartCount = useCartStore((state) => state.items.reduce((sum, item) => sum + item.quantity, 0));
+    // const cartCount = useCartStore((state) => state.items.reduce((sum, item) => sum + item.quantity, 0)); // Removed local store dependency
+    const { sessionId, currentOrderId } = useCartStore();
     const [showCartSheet, setShowCartSheet] = useState(false);
+
+    // Fetch cart for badge count
+    const cartOrder = useQuery(api.orders.getCart, 
+        currentOrderId ? { orderId: currentOrderId as any } : 
+        sessionId ? { sessionId } : "skip"
+    );
+    const cartCount = cartOrder?.items?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0;
 
     // Fetch all drinks from Convex
     const allDrinks = useQuery(api.drinks.listDrinks) || [];
@@ -145,7 +153,21 @@ const ProductsScreen = () => {
 
                         {/* Category Tabs (only in products mode) */}
                         {viewMode === 'products' && (
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', maxWidth: isCompact ? '100%' : 'unset' }}>
+                            <div 
+                                style={{ 
+                                    display: 'flex', 
+                                    gap: '8px', 
+                                    flexWrap: isCompact ? 'nowrap' : 'wrap', 
+                                    maxWidth: isCompact ? '100%' : 'unset',
+                                    overflowX: isCompact ? 'auto' : 'visible',
+                                    paddingBottom: isCompact ? '4px' : '0',
+                                    width: isCompact ? '100%' : 'auto',
+                                    scrollbarWidth: 'none', // Hide scrollbar for Firefox
+                                    msOverflowStyle: 'none', // Hide scrollbar for IE/Edge
+                                }}
+                                className="hide-scrollbar" // Assuming you have a global class or I'll add inline style for hiding scrollbar
+                            >
+                                {isCompact && <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>}
                                 {categories.map(category => (
                                     <button
                                         key={category}
@@ -154,13 +176,15 @@ const ProductsScreen = () => {
                                             padding: '8px 16px',
                                             borderRadius: '8px',
                                             border: `1px solid ${selectedCategory === category ? theme.neutral[900] : theme.neutral[300]}`,
-                                            backgroundColor: selectedCategory === category ? theme.neutral[0] : theme.neutral[0],
+                                            backgroundColor: selectedCategory === category ? theme.neutral[0] : (isCompact ? 'rgba(255,255,255,0.5)' : theme.neutral[0]),
                                             color: selectedCategory === category ? theme.neutral[900] : theme.neutral[500],
                                             fontWeight: selectedCategory === category ? 600 : 400,
                                             cursor: 'pointer',
                                             fontFamily: 'Instrument Sans, sans-serif',
                                             fontSize: isCompact ? '13px' : '14px',
-                                            transition: 'all 0.2s'
+                                            transition: 'all 0.2s',
+                                            whiteSpace: 'nowrap', // Prevent wrapping text
+                                            flexShrink: 0, // Prevent shrinking
                                         }}
                                     >
                                         {category}
@@ -355,9 +379,10 @@ const ProductsScreen = () => {
                         onClick={() => setShowCartSheet((prev) => !prev)}
                         style={{
                             position: 'fixed',
-                            bottom: `calc(90px + env(safe-area-inset-bottom, 0px))`,
-                            left: '50%',
-                            transform: 'translateX(-50%)',
+                            bottom: `calc(120px + env(safe-area-inset-bottom, 0px))`, // Moved up to clear the liquid footer
+                            right: '20px', // Moved to right side for better ergonomics
+                            left: 'auto',
+                            transform: 'none',
                             padding: '14px 24px',
                             backgroundColor: theme.brand.pine,
                             color: 'white',
@@ -365,11 +390,19 @@ const ProductsScreen = () => {
                             border: 'none',
                             fontWeight: 600,
                             fontSize: '15px',
-                            boxShadow: '0 12px 30px rgba(15, 23, 42, 0.32)',
+                            boxShadow: '0 8px 20px rgba(15, 23, 42, 0.25)',
                             zIndex: 1200,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            backdropFilter: 'blur(10px)', // Add glass feel to button too
                         }}
                     >
-                        {showCartSheet ? 'Close Cart' : `Cart${cartCount ? ` · ${cartCount}` : ''}`}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm7 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-7-4h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2z" />
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                        </svg>
+                        {showCartSheet ? 'Close' : `Cart${cartCount ? ` · ${cartCount}` : ''}`}
                     </button>
                 </>
             )}

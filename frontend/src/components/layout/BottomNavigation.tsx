@@ -47,38 +47,56 @@ const BottomNavigation = ({ currentIndex, onNavigate, voiceClient, isCompact = f
     return (
         <div
             style={{
-                position: 'relative',
-                height: isCompact ? '76px' : '100px',
-                paddingBottom: isCompact ? 'env(safe-area-inset-bottom, 0px)' : 0,
+                position: isCompact ? 'fixed' : 'relative',
+                bottom: isCompact ? '20px' : 'auto',
+                left: isCompact ? '20px' : 'auto',
+                right: isCompact ? '20px' : 'auto',
+                height: isCompact ? 'auto' : '100px',
+                zIndex: 1000,
+                pointerEvents: 'none', // Allow clicks to pass through the container area not covered by the bar
             }}
         >
-            {/* Bottom bar */}
+            {/* Bottom bar - Liquid Glass Design for Mobile */}
             <div
                 style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: isCompact ? '76px' : '100px',
-                    backgroundColor: theme.neutral[0],
-                    borderTop: `1px solid ${theme.neutral[300]}`,
+                    position: isCompact ? 'relative' : 'absolute',
+                    bottom: isCompact ? 'auto' : 0,
+                    left: isCompact ? 'auto' : 0,
+                    right: isCompact ? 'auto' : 0,
+                    height: isCompact ? '70px' : '100px',
+                    backgroundColor: isCompact ? 'rgba(255, 255, 255, 0.75)' : theme.neutral[0],
+                    backdropFilter: isCompact ? 'blur(20px)' : 'none',
+                    WebkitBackdropFilter: isCompact ? 'blur(20px)' : 'none',
+                    borderTop: isCompact ? '1px solid rgba(255, 255, 255, 0.4)' : `1px solid ${theme.neutral[300]}`,
+                    borderRadius: isCompact ? '24px' : '0',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    paddingBottom: isCompact ? '12px' : '24px',
-                    paddingTop: isCompact ? '12px' : '8px',
+                    paddingBottom: isCompact ? '0' : '24px',
+                    paddingTop: isCompact ? '0' : '8px',
+                    boxShadow: isCompact ? '0 8px 32px rgba(0, 0, 0, 0.1)' : 'none',
+                    pointerEvents: 'auto',
+                    width: '100%',
                 }}
             >
                 <div
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: isCompact ? '12px' : '18px',
+                        justifyContent: 'space-between',
+                        width: isCompact ? '100%' : 'auto',
+                        padding: isCompact ? '0 24px' : '0',
+                        gap: isCompact ? '0' : '18px',
                     }}
                 >
                     {screenNames.map((name, index) => {
                         const isSelected = currentIndex === index;
                         const color = isSelected ? selectedColor : unselectedColor;
+
+                        // Skip the middle item for mobile (Voice button placeholder) if needed, 
+                        // but here we just distribute them. 
+                        // Actually, let's arrange them around the center voice button if desired, 
+                        // or keep them as is. The voice button is absolute positioned.
 
                         return (
                             <button
@@ -86,18 +104,27 @@ const BottomNavigation = ({ currentIndex, onNavigate, voiceClient, isCompact = f
                                 onClick={() => onNavigate(index)}
                                 style={{
                                     display: 'flex',
+                                    flexDirection: isCompact ? 'column' : 'row',
                                     alignItems: 'center',
-                                    gap: isCompact ? '6px' : '10px',
+                                    gap: isCompact ? '4px' : '10px',
                                     cursor: 'pointer',
                                     background: 'none',
                                     border: 'none',
                                     padding: 0,
                                     color,
-                                    transition: 'color 0.2s ease',
+                                    transition: 'all 0.2s ease',
+                                    transform: isSelected && isCompact ? 'translateY(-2px)' : 'none',
                                 }}
                                 className="no-select"
                             >
-                                <div style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ 
+                                    width: '24px', 
+                                    height: '24px', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
+                                    filter: isSelected && isCompact ? `drop-shadow(0 0 8px ${theme.brand.pine}40)` : 'none'
+                                }}>
                                     {icons[index]}
                                 </div>
                                 <span
@@ -113,12 +140,12 @@ const BottomNavigation = ({ currentIndex, onNavigate, voiceClient, isCompact = f
                                 {isCompact && (
                                     <span
                                         style={{
-                                            fontSize: '12px',
-                                            fontWeight: isSelected ? 600 : 500,
+                                            fontSize: '10px',
+                                            fontWeight: isSelected ? 700 : 500,
                                             letterSpacing: 0.2,
                                             textTransform: 'uppercase',
                                             display: 'block',
-                                            marginTop: '2px',
+                                            opacity: isSelected ? 1 : 0.7,
                                         }}
                                     >
                                         {name.slice(0, 3)}
@@ -130,14 +157,16 @@ const BottomNavigation = ({ currentIndex, onNavigate, voiceClient, isCompact = f
                 </div>
             </div>
 
-            {/* Voice button - positioned like Flutter (right: 154px, top: 15px) */}
+            {/* Voice button - Floating above liquid glass */}
             <div
                 style={{
                     position: 'absolute',
                     right: isCompact ? '50%' : '154px',
-                    top: isCompact ? '-28px' : '15px',
+                    top: isCompact ? '-25px' : '15px',
                     zIndex: 10,
                     transform: isCompact ? 'translateX(50%)' : 'none',
+                    pointerEvents: 'auto',
+                    filter: isCompact ? 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))' : 'none',
                 }}
             >
                 <VoiceButton voiceClient={voiceClient} />

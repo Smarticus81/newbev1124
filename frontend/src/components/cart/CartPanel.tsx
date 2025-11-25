@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { theme } from '../../styles/theme';
 import { useCartStore } from '../../store/cartStore';
 import CartItem from './CartItem';
@@ -14,7 +14,7 @@ interface CartPanelProps {
 
 const CartPanel = ({ isCompact = false, isOpen = true, onClose }: CartPanelProps) => {
     const { sessionId, currentOrderId } = useCartStore();
-    const [orderName, setOrderName] = useState("New Tab");
+    const [orderName, setOrderName] = useState("Active Cart");
     const [isProcessing, setIsProcessing] = useState(false);
 
     // Fetch cart from Convex using orderId (if Tab opened) or voice session ID
@@ -43,6 +43,19 @@ const CartPanel = ({ isCompact = false, isOpen = true, onClose }: CartPanelProps
     const subtotal = (cartOrder?.subtotal || 0) / 100;
     const tax = (cartOrder?.tax_amount || 0) / 100;
     const total = (cartOrder?.total || 0) / 100;
+
+    useEffect(() => {
+        if (cartOrder?._id) {
+            const nextName = cartOrder.order_name && typeof cartOrder.order_name === 'string'
+                ? cartOrder.order_name
+                : "Active Cart";
+            if (nextName !== orderName) {
+                setOrderName(nextName);
+            }
+        } else if (!currentOrderId && orderName !== "Active Cart") {
+            setOrderName("Active Cart");
+        }
+    }, [cartOrder?._id, cartOrder?.order_name, currentOrderId, orderName]);
 
     const handlePay = async () => {
         if (!cartOrder || items.length === 0) return;
@@ -75,20 +88,22 @@ const CartPanel = ({ isCompact = false, isOpen = true, onClose }: CartPanelProps
             position: 'fixed',
             left: '50%',
             transform: `translate(-50%, ${isOpen ? '0%' : '110%'})`,
-            bottom: `calc(env(safe-area-inset-bottom, 0px))`,
-            width: '100%',
+            bottom: `calc(env(safe-area-inset-bottom, 0px))`, // Give it some space from bottom edge
+            width: 'calc(100% - 32px)', // Add some margin on sides
             maxWidth: '520px',
-            backgroundColor: theme.neutral[0],
+            backgroundColor: 'rgba(255, 255, 255, 0.85)', // Semi-transparent for Liquid Glass
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             display: 'flex',
             flexDirection: 'column',
-            height: '75vh',
-            borderRadius: '22px 22px 12px 12px',
-            boxShadow: '0 -12px 35px rgba(15, 23, 42, 0.28)',
-            border: `1px solid ${theme.neutral[200]}`,
-            transition: 'transform 0.35s ease',
+            height: '70vh',
+            borderRadius: '24px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+            border: '1px solid rgba(255, 255, 255, 0.4)',
+            transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
             zIndex: 1100,
             overflow: 'hidden',
-            paddingBottom: `calc(12px + env(safe-area-inset-bottom, 0px))`,
+            paddingBottom: '16px',
             pointerEvents: isOpen ? 'auto' : 'none',
         }
         : {
@@ -210,76 +225,88 @@ const CartPanel = ({ isCompact = false, isOpen = true, onClose }: CartPanelProps
                         fontWeight: 700,
                     }}
                 />
-                <div style={{ ...theme.typography.caption1, color: theme.neutral[500], marginTop: '4px' }}>
-                    Session: {currentOrderId ? 'Tab Open' : (sessionId ? sessionId.slice(0, 8) : 'Connecting...')}
-                </div>
             </div>
 
-            {/* Cart Items List */}
-            <div
-                style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: bodyPadding,
-                }}
-            >
-                {items.length === 0 ? (
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            height: '100%',
-                            color: theme.neutral[400],
-                        }}
-                    >
-                        <p style={{ ...theme.typography.subheadText }}>Cart is empty</p>
+            {/* Body: Items + Summary */}
+            <div style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: 0,
+            }}>
+                {/* Cart Items List */}
+                <div
+                    style={{
+                        flex: 1,
+                        overflowY: 'auto',
+                        padding: bodyPadding,
+                    }}
+                >
+                    {items.length === 0 ? (
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '100%',
+                                color: theme.neutral[400],
+                            }}
+                        >
+                            <p style={{ ...theme.typography.subheadText }}>Cart is empty</p>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {items.map((item: any) => (
+                                <CartItem key={item.id} item={item} />
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Summary Section - Fixed at Bottom */}
+                <div style={{
+                    marginTop: 'auto',
+                    padding: isCompact ? '16px 20px 0 20px' : '16px',
+                    borderTop: isCompact ? '1px solid rgba(255, 255, 255, 0.4)' : `1px solid ${theme.neutral[200]}`,
+                    backgroundColor: isCompact ? 'rgba(255, 255, 255, 0.78)' : theme.neutral[0],
+                    backdropFilter: isCompact ? 'blur(12px)' : 'none',
+                    WebkitBackdropFilter: isCompact ? 'blur(12px)' : 'none',
+                }}>
+                    {/* Subtotal */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ ...theme.typography.subheadText, color: theme.neutral[600] }}>
+                            Subtotal
+                        </span>
+                        <span style={{ ...theme.typography.subheadText, color: theme.neutral[1000] }}>
+                            ${subtotal.toFixed(2)}
+                        </span>
                     </div>
-                ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        {items.map((item: any) => (
-                            <CartItem key={item.id} item={item} />
-                        ))}
+
+                    {/* Tax */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                        <span style={{ ...theme.typography.subheadText, color: theme.neutral[600] }}>
+                            Tax (8.25%)
+                        </span>
+                        <span style={{ ...theme.typography.subheadText, color: theme.neutral[1000] }}>
+                            ${tax.toFixed(2)}
+                        </span>
                     </div>
-                )}
-            </div>
 
-            {/* Summary Section */}
-            <div style={{ padding: isCompact ? '16px 20px 0 20px' : '16px', borderTop: `1px solid ${theme.neutral[200]}` }}>
-                {/* Subtotal */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ ...theme.typography.subheadText, color: theme.neutral[600] }}>
-                        Subtotal
-                    </span>
-                    <span style={{ ...theme.typography.subheadText, color: theme.neutral[1000] }}>
-                        ${subtotal.toFixed(2)}
-                    </span>
-                </div>
+                    {/* Total */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+                        <span style={{ ...theme.typography.headingH5, color: theme.neutral[1000], fontWeight: 600 }}>
+                            Total
+                        </span>
+                        <span style={{ ...theme.typography.headingH5, color: theme.neutral[1000], fontWeight: 600 }}>
+                            ${total.toFixed(2)}
+                        </span>
+                    </div>
 
-                {/* Tax */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <span style={{ ...theme.typography.subheadText, color: theme.neutral[600] }}>
-                        Tax (8.25%)
-                    </span>
-                    <span style={{ ...theme.typography.subheadText, color: theme.neutral[1000] }}>
-                        ${tax.toFixed(2)}
-                    </span>
-                </div>
-
-                {/* Total */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-                    <span style={{ ...theme.typography.headingH5, color: theme.neutral[1000], fontWeight: 600 }}>
-                        Total
-                    </span>
-                    <span style={{ ...theme.typography.headingH5, color: theme.neutral[1000], fontWeight: 600 }}>
-                        ${total.toFixed(2)}
-                    </span>
-                </div>
-
-                {/* BEVPRO Logo */}
-                <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: '8px' }}>
-                    <BevProLogo width={isCompact ? 64 : 80} color="#A5BEC5" />
+                    {/* BEVPRO Logo */}
+                    <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: '8px' }}>
+                        <BevProLogo width={isCompact ? 64 : 80} color="#A5BEC5" />
+                    </div>
                 </div>
             </div>
 

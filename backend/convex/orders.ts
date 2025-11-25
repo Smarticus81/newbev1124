@@ -419,7 +419,11 @@ export const listPendingOrders = query({
             .order("desc")
             .collect();
 
-        return orders;
+        return orders.filter((order: any) => {
+            if (!order.order_name) return false;
+            if (typeof order.order_name !== 'string') return false;
+            return order.order_name.trim().length > 0;
+        });
     },
 });
 
