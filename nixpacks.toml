@@ -14,5 +14,5 @@ cmds = [
 ]
 
 [start]
-cmd = "cd backend && node dist/server.js"
+cmd = "cd backend && node dist/src/server.js"
 
