@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { serve } from '@hono/node-server';
 import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import dotenv from 'dotenv';
@@ -101,20 +100,20 @@ app.get('/api/events/stream', async (c) => {
 });
 
 // Serve static frontend files in production
-// In production, frontend/dist is copied to backend/dist/frontend/dist
-const frontendDistPath = path.join(__dirname, '../frontend/dist');
+// In production, frontend/dist contents are copied to backend/dist/frontend/
+const frontendDistPath = path.join(__dirname, '../frontend');
 logger.info({ path: frontendDistPath, exists: fs.existsSync(frontendDistPath) }, 'Checking frontend dist path');
 
 if (fs.existsSync(frontendDistPath)) {
     logger.info({ path: frontendDistPath }, 'Serving frontend static files');
     
     // Serve static assets with correct root path (relative to cwd)
-    app.use('/assets/*', serveStatic({ root: './dist/frontend/dist' }));
-    app.use('/drink_images/*', serveStatic({ root: './dist/frontend/dist' }));
-    app.use('/drinks/*', serveStatic({ root: './dist/frontend/dist' }));
-    app.use('/images/*', serveStatic({ root: './dist/frontend/dist' }));
-    app.use('/favicon.ico', serveStatic({ root: './dist/frontend/dist', path: '/favicon.ico' }));
-    app.use('/vite.svg', serveStatic({ root: './dist/frontend/dist', path: '/vite.svg' }));
+    app.use('/assets/*', serveStatic({ root: './dist/frontend' }));
+    app.use('/drink_images/*', serveStatic({ root: './dist/frontend' }));
+    app.use('/drinks/*', serveStatic({ root: './dist/frontend' }));
+    app.use('/images/*', serveStatic({ root: './dist/frontend' }));
+    app.use('/favicon.ico', serveStatic({ root: './dist/frontend', path: '/favicon.ico' }));
+    app.use('/vite.svg', serveStatic({ root: './dist/frontend', path: '/vite.svg' }));
     
     // SPA fallback - serve index.html for all non-API routes
     app.get('*', async (c) => {
@@ -134,32 +133,85 @@ if (fs.existsSync(frontendDistPath)) {
 }
 
 const PORT = parseInt(process.env.PORT || '3000');
-const WS_PORT = parseInt(process.env.WS_PORT || '3001');
 
-// Start HTTP server
-logger.info(`Starting HTTP server on port ${PORT}`);
-serve({
-    fetch: app.fetch,
-    port: PORT,
+// Create HTTP server first
+const httpServer = createServer();
+
+// Attach Hono app to handle HTTP requests
+httpServer.on('request', async (req, res) => {
+    const url = `http://${req.headers.host || 'localhost'}${req.url}`;
+    
+    // Convert Node.js headers to Web API Headers
+    const headers = new Headers();
+    Object.entries(req.headers).forEach(([key, value]) => {
+        if (value) {
+            if (Array.isArray(value)) {
+                value.forEach(v => headers.append(key, v));
+            } else {
+                headers.set(key, value);
+            }
+        }
+    });
+    
+    // Handle request body for POST/PUT/PATCH requests
+    let body = null;
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+        body = await new Promise<Buffer>((resolve) => {
+            const chunks: Buffer[] = [];
+            req.on('data', (chunk) => chunks.push(chunk));
+            req.on('end', () => resolve(Buffer.concat(chunks)));
+        });
+    }
+    
+    const request = new Request(url, {
+        method: req.method,
+        headers: headers,
+        body: body,
+    });
+
+    const response = await app.fetch(request);
+    
+    res.statusCode = response.status;
+    response.headers.forEach((value, key) => {
+        res.setHeader(key, value);
+    });
+    
+    if (response.body) {
+        const reader = response.body.getReader();
+        const pump = async (): Promise<void> => {
+            const { done, value } = await reader.read();
+            if (done) {
+                res.end();
+                return;
+            }
+            res.write(value);
+            await pump();
+        };
+        await pump();
+    } else {
+        res.end();
+    }
 });
 
-// Start WebSocket server
-const httpServer = createServer();
+// Attach WebSocket server to the same HTTP server
 const wss = new WebSocketServer({ server: httpServer });
 
 const voiceHandler = new VoiceWSHandler(wss);
 voiceHandler.initialize();
 
-httpServer.listen(WS_PORT, () => {
-    logger.info(`WebSocket server listening on port ${WS_PORT}`);
-    logger.info(`Voice POS backend ready! 🎙️`);
+// Start the server
+httpServer.listen(PORT, () => {
+    logger.info(`HTTP server listening on port ${PORT}`);
+    logger.info(`WebSocket server listening on port ${PORT}`);
+    logger.info(`Voice POS backend ready!`);
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
     logger.info('SIGTERM received, shutting down gracefully');
+    wss.close();
     httpServer.close(() => {
-        logger.info('HTTP server closed');
+        logger.info('Server closed');
         process.exit(0);
     });
 });

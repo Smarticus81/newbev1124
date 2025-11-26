@@ -12,9 +12,8 @@ cmds = [
   "cd frontend && npm run build",
   "cd backend && npm run build",
   "mkdir -p backend/dist/frontend",
-  "cp -r frontend/dist backend/dist/frontend/",
-  "ls -la backend/dist/frontend/",
-  "ls -la backend/dist/frontend/dist/ || echo 'dist subfolder not found'"
+  "cp -r frontend/dist/* backend/dist/frontend/",
+  "ls -la backend/dist/frontend/"
 ]
 
 [start]

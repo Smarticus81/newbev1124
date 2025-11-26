@@ -56,7 +56,9 @@ npm run dev
 
 Backend will run on:
 - HTTP API: `http://localhost:3000`
-- WebSocket: `ws://localhost:3001`
+- WebSocket: `ws://localhost:3001` (development only)
+
+**Note:** In production, both HTTP and WebSocket run on the same port for Railway compatibility.
 
 ### 2. Frontend Setup
 
@@ -109,15 +111,14 @@ Try these commands:
 ### Backend (.env)
 
 ```env
-# Database
-DATABASE_URL="file:./pos.db"
+# Convex (REQUIRED)
+CONVEX_URL=https://your-convex-deployment.convex.cloud
 
 # Gemini API (REQUIRED)
-GEMINI_API_KEY="your-gemini-api-key-here"
+GEMINI_API_KEY=your-gemini-api-key-here
 
 # Server Configuration
 PORT=3000
-WS_PORT=3001
 NODE_ENV=development
 
 # CORS
@@ -128,12 +129,14 @@ VENUE_NAME="Knotting Hill Place"
 VENUE_ID=1
 ```
 
-### Frontend (.env)
+### Frontend (.env) - Optional
 
 ```env
-VITE_API_URL=http://localhost:3000
+# Optional: Override WebSocket URL (auto-detected in production)
 VITE_WS_URL=ws://localhost:3001
 ```
+
+**Note:** In development, backend uses separate ports (HTTP: 3000, WS: 3001). In production, both use the same port.
 
 ## 🛠️ Development
 
@@ -183,7 +186,7 @@ Latency: ~200ms end-to-end
 
 ## 🔌 API Endpoints
 
-### HTTP API (Port 3000)
+### HTTP API
 
 - `GET /health` - Health check
 - `GET /api/products` - Get all products
@@ -194,7 +197,10 @@ Latency: ~200ms end-to-end
 - `GET /api/events/bookings` - Get event bookings
 - `GET /api/events/packages` - Get event packages
 
-### WebSocket (Port 3001)
+### WebSocket
+
+**Development:** `ws://localhost:3001`  
+**Production:** Same host and port as HTTP (auto-detected)
 
 Binary message format:
 - `0x01` - Audio data (PCM16)
@@ -237,9 +243,10 @@ JSON control messages:
 - Add your Gemini API key in backend/.env
 
 ### WebSocket connection failed
-- Check backend is running on port 3001
+- Check backend is running
 - Check firewall settings
-- Verify WS_PORT in .env
+- In production, WebSocket uses the same port as HTTP
+- In development, verify WebSocket is on port 3001
 
 ### No audio playback
 - Check browser microphone permissions
@@ -297,6 +304,40 @@ The UI preserves the exact design from the Flutter app:
 - [Prisma Documentation](https://www.prisma.io/docs)
 - [Hono Framework](https://hono.dev/)
 - [Vite Documentation](https://vite.dev/)
+
+## 🚀 Deployment (Railway)
+
+The application is configured to deploy as a monorepo on Railway:
+
+1. **Monorepo Structure**: Both frontend and backend deploy together
+2. **Single Port**: HTTP and WebSocket run on the same port (Railway's `$PORT`)
+3. **Static Files**: Frontend is built and served by the backend
+
+### Environment Variables Required:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+CONVEX_URL=https://your-convex-deployment.convex.cloud
+NODE_ENV=production
+FRONTEND_URL=https://your-railway-app.up.railway.app
+VENUE_NAME="Your Venue Name"
+VENUE_ID=1
+```
+
+### Build Process:
+
+The root `nixpacks.toml` handles the build:
+1. Install dependencies for both frontend and backend
+2. Build frontend → `frontend/dist`
+3. Build backend → `backend/dist`
+4. Copy frontend build → `backend/dist/frontend`
+5. Start server: `node backend/dist/src/server.js`
+
+The server automatically:
+- Serves API routes at `/api/*`
+- Serves frontend static files
+- Handles WebSocket connections on the same port
+- Provides SPA fallback routing
 
 ## 🤝 Contributing
 
