@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { theme } from '../styles/theme';
 import BevProLogo from '../components/common/BevProLogo';
 import { useQuery } from 'convex/react';
-import { api } from '../../../backend/convex/_generated/api';
+import { api } from '../../convex/_generated/api';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
 const SettingsScreen = () => {
@@ -23,9 +23,9 @@ const SettingsScreen = () => {
     ];
 
     // Group drinks by category
-    const categories = Array.from(new Set(allDrinks.map((d: any) => d.category))).filter(Boolean);
+    const categories = Array.from(new Set(allDrinks.map((d: any) => d.category))).filter(Boolean) as string[];
     const categoryGroups: Record<string, any[]> = {};
-    categories.forEach(cat => {
+    categories.forEach((cat: string) => {
         categoryGroups[cat] = allDrinks.filter((d: any) => d.category === cat);
     });
 

@@ -1,9 +1,9 @@
 import { theme } from '../../styles/theme';
 import { useCartStore } from '../../store/cartStore';
 import { useMutation } from 'convex/react';
-import { api } from '../../../../backend/convex/_generated/api';
+import { api } from '../../../convex/_generated/api';
 import type { CartItem as CartItemType } from '../../types/models';
-import type { Id } from '../../../../backend/convex/_generated/dataModel';
+import type { Id } from '../../../convex/_generated/dataModel';
 
 interface CartItemProps {
     item: CartItemType;

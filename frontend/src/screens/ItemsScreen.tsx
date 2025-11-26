@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { theme } from '../styles/theme';
 import { useQuery } from 'convex/react';
-import { api } from '../../../backend/convex/_generated/api';
+import { api } from '../../convex/_generated/api';
 import BevProLogo from '../components/common/BevProLogo';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
@@ -11,7 +11,7 @@ const ItemsScreen = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
 
-    const categories = ['All', ...Array.from(new Set(drinks.map((d: any) => d.category)))];
+    const categories = ['All', ...Array.from(new Set(drinks.map((d: any) => d.category)))] as string[];
 
     const filteredDrinks = drinks.filter((drink: any) => {
         const matchesSearch = drink.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -106,7 +106,7 @@ const ItemsScreen = () => {
                             cursor: 'pointer'
                         }}
                     >
-                        {categories.map(cat => (
+                        {categories.map((cat) => (
                             <option key={cat} value={cat}>{cat}</option>
                         ))}
                     </select>

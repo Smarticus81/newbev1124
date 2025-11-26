@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { theme } from '../styles/theme';
 import { useQuery } from 'convex/react';
-import { api } from '../../../backend/convex/_generated/api';
+import { api } from '../../convex/_generated/api';
 import type { Product } from '../types/models';
 import ProductCard from '../components/products/ProductCard';
 import CartPanel from '../components/cart/CartPanel';

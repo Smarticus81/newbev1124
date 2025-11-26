@@ -305,9 +305,36 @@ The UI preserves the exact design from the Flutter app:
 - [Hono Framework](https://hono.dev/)
 - [Vite Documentation](https://vite.dev/)
 
-## 🚀 Deployment (Railway)
+## 🚀 Deployment
 
-The application is configured to deploy as a monorepo on Railway:
+### Option 1: Vercel (Recommended)
+
+Deploy frontend to Vercel and backend separately for optimal performance and cost.
+
+See **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)** for detailed instructions.
+
+Quick start:
+```bash
+# Deploy frontend to Vercel
+cd frontend
+vercel
+
+# Set environment variable
+vercel env add VITE_WS_URL
+# Enter: wss://your-backend-url.com
+
+vercel --prod
+```
+
+**Benefits:**
+- Free frontend hosting with excellent CDN
+- Automatic HTTPS and SSL
+- Best performance with global edge network
+- Backend can scale independently
+
+### Option 2: Railway (Monorepo)
+
+Deploy as a monorepo on Railway (previous setup):
 
 1. **Monorepo Structure**: Both frontend and backend deploy together
 2. **Single Port**: HTTP and WebSocket run on the same port (Railway's `$PORT`)
