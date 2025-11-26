@@ -1,8 +1,8 @@
 import { theme } from '../styles/theme';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../backend/convex/_generated/api';
+import { api } from '../../convex/_generated/api';
 import BevProLogo from '../components/common/BevProLogo';
-import type { Id } from '../../../backend/convex/_generated/dataModel';
+import type { Id } from '../../convex/_generated/dataModel';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
 const TransactionsScreen = () => {

@@ -29,7 +29,11 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
-    "src",
-    "../backend/convex/_generated/**/*"
+    "src"
+  ],
+  "exclude": [
+    "../backend",
+    "node_modules",
+    "dist"
   ]
 }

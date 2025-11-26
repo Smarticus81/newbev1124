@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "prebuild": "mkdir -p convex/_generated && cp -r ../backend/convex/_generated/* convex/_generated/ 2>/dev/null || true",
+    "build": "npm run prebuild && tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {

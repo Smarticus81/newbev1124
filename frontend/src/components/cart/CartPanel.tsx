@@ -3,7 +3,7 @@ import { theme } from '../../styles/theme';
 import { useCartStore } from '../../store/cartStore';
 import CartItem from './CartItem';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../../../backend/convex/_generated/api';
+import { api } from '../../../convex/_generated/api';
 import BevProLogo from '../common/BevProLogo';
 
 interface CartPanelProps {
