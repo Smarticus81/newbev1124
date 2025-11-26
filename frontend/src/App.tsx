@@ -35,10 +35,10 @@ function App() {
     const isCompactLayout = useMediaQuery('(max-width: 1024px)');
 
     // Dynamic WebSocket URL based on environment
-    // In production, set VITE_WS_URL environment variable to your backend Railway URL
+    // In production (monorepo deployment), WebSocket is on the same host/port as HTTP
     const wsUrl = import.meta.env.VITE_WS_URL 
         || (import.meta.env.PROD 
-            ? `wss://${window.location.hostname.replace('frontend', 'backend')}` // Attempt auto-detect
+            ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
             : 'ws://localhost:3001');           // Development: local (dedicated port)
 
     const voiceClient = useVoiceClient(wsUrl, handleToolExecuted);
