@@ -13,18 +13,18 @@
     "keywords": [
         "voice",
         "pos",
-        "gemini",
-        "websocket"
+        "openai",
+        "webrtc"
     ],
     "author": "",
     "license": "MIT",
     "dependencies": {
-        "@google/genai": "^1.30.0",
         "@hono/node-server": "^1.13.7",
         "@types/uuid": "^10.0.0",
         "convex": "^1.29.3",
         "dotenv": "^16.4.7",
         "hono": "^4.10.6",
+        "openai": "^4.77.3",
         "pino": "^9.5.0",
         "pino-pretty": "^13.0.0",
         "uuid": "^13.0.0",

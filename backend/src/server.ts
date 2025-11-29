@@ -9,6 +9,7 @@ import { logger } from './utils/logger.js';
 import { productRoutes } from './routes/products.js';
 import { orderRoutes } from './routes/orders.js';
 import { eventRoutes } from './routes/events.js';
+import { realtimeRoutes } from './routes/realtime.js';
 
 import fs from 'fs';
 import path from 'path';
@@ -19,7 +20,7 @@ const __dirname = path.dirname(__filename);
 
 // Load .env first
 dotenv.config();
-console.log('Loaded .env, GEMINI_API_KEY present:', !!process.env.GEMINI_API_KEY);
+console.log('Loaded .env, OPENAI_API_KEY present:', !!process.env.OPENAI_API_KEY);
 
 // Manually load .env.local if it exists (overriding .env)
 const envLocalPath = path.join(process.cwd(), '.env.local');
@@ -30,7 +31,7 @@ if (fs.existsSync(envLocalPath)) {
     for (const k in envConfig) {
         process.env[k] = envConfig[k];
     }
-    console.log('After .env.local, GEMINI_API_KEY present:', !!process.env.GEMINI_API_KEY);
+    console.log('After .env.local, OPENAI_API_KEY present:', !!process.env.OPENAI_API_KEY);
 } else {
     console.log('.env.local does not exist');
 }
@@ -58,6 +59,7 @@ app.get('/health', (c) => {
 app.route('/api/products', productRoutes);
 app.route('/api/orders', orderRoutes);
 app.route('/api/events', eventRoutes);
+app.route('/api/realtime', realtimeRoutes);
 
 // SSE for real-time UI updates
 app.get('/api/events/stream', async (c) => {

@@ -120,6 +120,18 @@ export class ToolRegistry {
         }];
     }
 
+    /**
+     * Convert tools to OpenAI function calling format
+     */
+    toOpenAITools(): any[] {
+        return Array.from(this.tools.values()).map(tool => ({
+            type: 'function',
+            name: tool.definition.name,
+            description: tool.definition.description,
+            parameters: tool.definition.parameters
+        }));
+    }
+
     getAllTools(): ToolDefinition[] {
         return Array.from(this.tools.values()).map(t => t.definition);
     }
