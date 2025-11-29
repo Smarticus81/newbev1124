@@ -1,4 +1,8 @@
-backend/
+# Exclude backend except Convex generated files needed by frontend
+backend/*
+!backend/convex/
+!backend/convex/_generated/
+
 .git/
 *.log
 node_modules/
