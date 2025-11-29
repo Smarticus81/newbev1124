@@ -58,7 +58,9 @@ export class OpenAIRealtimeClient {
                 throw new Error(`Failed to get ephemeral token: ${tokenResponse.statusText}`);
             }
 
-            const { client_secret: ephemeralToken } = await tokenResponse.json();
+            const data = await tokenResponse.json();
+            // client_secret is an object with a 'value' field containing the ephemeral token
+            const ephemeralToken = data.client_secret?.value || data.client_secret;
 
             // Step 2: Create RTCPeerConnection
             this.peerConnection = new RTCPeerConnection();
