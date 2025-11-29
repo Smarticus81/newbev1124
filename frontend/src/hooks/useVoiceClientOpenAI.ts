@@ -41,10 +41,22 @@ export const useVoiceClientOpenAI = (
             if (!response.ok) {
                 throw new Error(`Failed to fetch tools: ${response.statusText}`);
             }
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error(
+                    'Backend not available. Please ensure:\n' +
+                    '1. Backend is deployed and running\n' +
+                    '2. VITE_API_URL environment variable is set to backend URL\n' +
+                    `3. Current API URL: ${apiUrl}`
+                );
+            }
+
             const { tools, instructions } = await response.json();
             return { tools, instructions };
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to fetch tools:', error);
+            console.error('API URL:', apiUrl);
             throw error;
         }
     }, [apiUrl]);
