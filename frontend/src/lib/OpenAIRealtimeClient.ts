@@ -30,10 +30,8 @@ export class OpenAIRealtimeClient {
     private peerConnection: RTCPeerConnection | null = null;
     private dataChannel: RTCDataChannel | null = null;
     private audioContext: AudioContext | null = null;
-    private audioWorklet: AudioWorkletNode | null = null;
     private isConnected = false;
     private isSpeaking = false;
-    private sessionId: string | null = null;
 
     constructor(config: RealtimeClientConfig, events: RealtimeClientEvents) {
         this.config = config;
@@ -60,8 +58,7 @@ export class OpenAIRealtimeClient {
                 throw new Error(`Failed to get ephemeral token: ${tokenResponse.statusText}`);
             }
 
-            const { client_secret: ephemeralToken, session_id } = await tokenResponse.json();
-            this.sessionId = session_id;
+            const { client_secret: ephemeralToken } = await tokenResponse.json();
 
             // Step 2: Create RTCPeerConnection
             this.peerConnection = new RTCPeerConnection();

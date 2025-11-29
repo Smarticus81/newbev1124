@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { OpenAIRealtimeClient, RealtimeClientEvents } from '../lib/OpenAIRealtimeClient';
+import { OpenAIRealtimeClient, type RealtimeClientEvents } from '../lib/OpenAIRealtimeClient';
 
 interface VoiceClientState {
     isConnected: boolean;
@@ -133,7 +133,7 @@ export const useVoiceClientOpenAI = (
                     }));
                 },
 
-                onAudioData: (audioData) => {
+                onAudioData: (_audioData) => {
                     // Audio is handled automatically by WebRTC audio tracks
                     // This callback is for custom audio processing if needed
                 },
