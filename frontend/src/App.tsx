@@ -7,7 +7,8 @@ import TransactionsScreen from './screens/TransactionsScreen';
 import ItemsScreen from './screens/ItemsScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import BottomNavigation from './components/layout/BottomNavigation';
-import { useVoiceClient } from './hooks/useVoiceClient';
+// Use OpenAI Realtime API instead of Gemini/WebSocket
+import { useVoiceClientOpenAI } from './hooks/useVoiceClientOpenAI';
 import Header from './components/layout/Header';
 import { useMediaQuery } from './hooks/useMediaQuery';
 
@@ -34,14 +35,14 @@ function App() {
 
     const isCompactLayout = useMediaQuery('(max-width: 1024px)');
 
-    // Dynamic WebSocket URL based on environment
-    // In production (monorepo deployment), WebSocket is on the same host/port as HTTP
-    const wsUrl = import.meta.env.VITE_WS_URL 
-        || (import.meta.env.PROD 
-            ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
-            : 'ws://localhost:3001');           // Development: local (dedicated port)
+    // Backend API URL for OpenAI Realtime API
+    // Backend handles ephemeral tokens and tool execution
+    const apiUrl = import.meta.env.VITE_API_URL
+        || (import.meta.env.PROD
+            ? `${window.location.protocol}//${window.location.host}`
+            : 'http://localhost:3000');           // Development: local backend
 
-    const voiceClient = useVoiceClient(wsUrl, handleToolExecuted);
+    const voiceClient = useVoiceClientOpenAI(apiUrl, handleToolExecuted);
     const { isListening, isSpeaking } = voiceClient;
 
     const screens = [
