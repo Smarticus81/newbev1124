@@ -47,10 +47,16 @@ realtimeRoutes.post('/session', async (c) => {
         if (!response.ok) {
             const error = await response.text();
             logger.error({ error, status: response.status }, 'Failed to create OpenAI session');
-            return c.json({ error: 'Failed to create session' }, response.status);
+            return c.json({ error: 'Failed to create session' }, 500);
         }
 
-        const data = await response.json();
+        const data = await response.json() as {
+            client_secret: { value: string; expires_at: number };
+            expires_at: number;
+            id: string;
+            model: string;
+            voice: string;
+        };
 
         logger.info({
             client_secret: data.client_secret ? 'present' : 'missing',
