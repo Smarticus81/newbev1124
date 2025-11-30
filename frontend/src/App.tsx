@@ -37,10 +37,24 @@ function App() {
 
     // Backend API URL for OpenAI Realtime API
     // Backend handles ephemeral tokens and tool execution
-    const apiUrl = import.meta.env.VITE_API_URL
+    const normalizeApiUrl = (url: string): string => {
+        // If URL already has a protocol, return as-is
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return url;
+        }
+        // Otherwise, add https:// for production URLs or http:// for localhost
+        if (url.includes('localhost') || url.includes('127.0.0.1')) {
+            return `http://${url}`;
+        }
+        return `https://${url}`;
+    };
+
+    const rawApiUrl = import.meta.env.VITE_API_URL
         || (import.meta.env.PROD
             ? `${window.location.protocol}//${window.location.host}`
             : 'http://localhost:3000');           // Development: local backend
+
+    const apiUrl = normalizeApiUrl(rawApiUrl);
 
     const voiceClient = useVoiceClientOpenAI(apiUrl, handleToolExecuted);
     const { isListening, isSpeaking } = voiceClient;

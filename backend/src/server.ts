@@ -39,10 +39,30 @@ const app = new Hono();
 // CORS configuration
 app.use('/*', cors({
     origin: (origin) => {
+        // No origin header (like Postman or server-to-server)
         if (!origin) return process.env.FRONTEND_URL || 'http://localhost:5173';
-        if (origin.startsWith('http://localhost:') || origin === process.env.FRONTEND_URL) {
+
+        // Allow localhost for development
+        if (origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:')) {
             return origin;
         }
+
+        // Allow configured frontend URL
+        if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+            return origin;
+        }
+
+        // Allow Railway.app deployments
+        if (origin.endsWith('.railway.app')) {
+            return origin;
+        }
+
+        // Allow Vercel deployments
+        if (origin.endsWith('.vercel.app')) {
+            return origin;
+        }
+
+        // Default to configured frontend or localhost
         return process.env.FRONTEND_URL || 'http://localhost:5173';
     },
     credentials: true,
