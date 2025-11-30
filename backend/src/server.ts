@@ -2,9 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { createServer } from 'http';
-import { WebSocketServer } from 'ws';
 import dotenv from 'dotenv';
-import { VoiceWSHandler } from './websocket/VoiceWSHandler.js';
 import { logger } from './utils/logger.js';
 import { productRoutes } from './routes/products.js';
 import { orderRoutes } from './routes/orders.js';
@@ -195,23 +193,16 @@ httpServer.on('request', async (req, res) => {
     }
 });
 
-// Attach WebSocket server to the same HTTP server
-const wss = new WebSocketServer({ server: httpServer });
-
-const voiceHandler = new VoiceWSHandler(wss);
-voiceHandler.initialize();
-
 // Start the server
 httpServer.listen(PORT, () => {
     logger.info(`HTTP server listening on port ${PORT}`);
-    logger.info(`WebSocket server listening on port ${PORT}`);
+    logger.info(`OpenAI Realtime API ready via WebRTC`);
     logger.info(`Voice POS backend ready!`);
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
     logger.info('SIGTERM received, shutting down gracefully');
-    wss.close();
     httpServer.close(() => {
         logger.info('Server closed');
         process.exit(0);
